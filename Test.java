@@ -3,11 +3,13 @@ import java.util.*;
 
 public class Test {
 	public static void main(String[] args) {
-//		List<String> result=Solution.deserialize("[123,456,[788,799,833],[[]],10,[]]");
-//		for(String word:result) {
-//			out.print(word+" ");
-//		}
-//		out.println("");
-		out.println(Integer.valueOf("-1234"));
+//		KSbTest kSb=new KSbTest(3);
+//		kSb.append('a');
+//		kSb.append('c');
+//		kSb.append('/');
+//		KSbTest kSb2=new KSbTest(4);
+//		kSb2.append(kSb.returnSb());
+//		out.println(kSb2.returnSb());
+		
 	}
 }

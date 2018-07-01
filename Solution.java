@@ -983,121 +983,173 @@ public class Solution {
 	// current stack new stack
 	// - start - (- start
 	// + end +1 + end +1)
-	
+
 	// ****end****
 
 	// 71 Simplify Path
 	// ***start***
-    private static void addToStack(String word, Stack<String> s) {
-    	if(word.equals("..")) {
-    		if(!s.isEmpty()) {
-    			s.pop();
-    		}
-    	}
-    	else if(!word.equals(".")) {
-    		s.push(word);
-    	}
-    }
-    
-    public static String simplifyPath(String path) {
-    	int start=1;
-        Stack<String> s=new Stack<>();
-        for(int i=1; i<=path.length()-1; i++) {
-            if(path.charAt(i)=='/') {
-            	if(path.charAt(i-1)!='/') {
-            		String word=path.substring(start, i);
-            		addToStack(word, s);
-            	}
-            	start=i+1;
-            }
-        }
-        if(path.charAt(path.length()-1)!='/') {
-        	String word=path.substring(start, path.length());
-        	addToStack(word, s);
-        }
-        
-        if(s.isEmpty()) {
-        	return "/";
-        }
-        
-        StringBuilder sb=new StringBuilder();
-        for(String word:s) {
-        	sb.append("/"+word);
-        }
-        return sb.toString();
-    }
-    
+	private static void addToStack(String word, Stack<String> s) {
+		if (word.equals("..")) {
+			if (!s.isEmpty()) {
+				s.pop();
+			}
+		}
+		else if (!word.equals(".")) {
+			s.push(word);
+		}
+	}
+
+	public static String simplifyPath(String path) {
+		int start = 1;
+		Stack<String> s = new Stack<>();
+		for (int i = 1; i <= path.length() - 1; i++) {
+			if (path.charAt(i) == '/') {
+				if (path.charAt(i - 1) != '/') {
+					String word = path.substring(start, i);
+					addToStack(word, s);
+				}
+				start = i + 1;
+			}
+		}
+		if (path.charAt(path.length() - 1) != '/') {
+			String word = path.substring(start, path.length());
+			addToStack(word, s);
+		}
+
+		if (s.isEmpty()) {
+			return "/";
+		}
+
+		StringBuilder sb = new StringBuilder();
+		for (String word : s) {
+			sb.append("/" + word);
+		}
+		return sb.toString();
+	}
+
 	// ****end****
 
 	// 385 Mini Parser
 	// ***start***
-    public NestedInteger deserialize(String s) {
-    	ArrayList<String> commandList=new ArrayList<>();
-    	int start;
-    	if(s.charAt(0)=='[') {
-    		start=1;
-    		commandList.add("[");
-    	}
-    	else {
-    		start=0;
-    	}
-    	for(int i=1; i<=s.length()-1; i++) {
-    		if(s.charAt(i)==',') {
-    			if(s.charAt(i-1)!=']') {
-    				commandList.add(s.substring(start, i));
-    			}
-    		}
-    		if(s.charAt(i)=='[') {
-    			commandList.add("[");
-    		}
-    		if(s.charAt(i)==']') {
-    			if(s.charAt(i-1)!=']' && s.charAt(i-1)!='[') {
-    				commandList.add(s.substring(start, i));
-    			}
-    			commandList.add("]");
-    		}
-    		if(!((s.charAt(i)>='0' && s.charAt(i)<='9') || s.charAt(i)=='-')) {
-    			start=i+1;
-    		}
-    	}
-    	if(s.charAt(s.length()-1)>='0' && s.charAt(s.length()-1)<='9') {
-    		commandList.add(s.substring(start, s.length()));
-    	}
-    	
-    	Stack<NestedInteger> stack=new Stack<>();
-    	for(String word:commandList) {
-    		if(word=="[") {
-    			NestedInteger ni=new NestedInteger();
-    			stack.push(ni);
-    		}
-    		else if(word=="]") {
-    			NestedInteger doneNi=stack.pop();
-    			if(!stack.isEmpty()) {
-    				stack.peek().add(doneNi);
-    			}
-    			else {
-    				return doneNi;
-    			}
-    		}
-    		else {
-    			NestedInteger valueNi=new NestedInteger(Integer.valueOf(word));
-    			if(!stack.isEmpty()) {
-        			NestedInteger ni=stack.peek();
-        			ni.add(valueNi);
-    			}
-    			else {
-    				return valueNi;
-    			}
-    		}
-    	}
-    	
-    	return null;
-    }
-    
-    // ****end****
-    
-    // 394 Decode String
-    // ***start***
+	public NestedInteger deserialize(String s) {
+		ArrayList<String> commandList = new ArrayList<>();
+		int start;
+		if (s.charAt(0) == '[') {
+			start = 1;
+			commandList.add("[");
+		}
+		else {
+			start = 0;
+		}
+		for (int i = 1; i <= s.length() - 1; i++) {
+			if (s.charAt(i) == ',') {
+				if (s.charAt(i - 1) != ']') {
+					commandList.add(s.substring(start, i));
+				}
+			}
+			if (s.charAt(i) == '[') {
+				commandList.add("[");
+			}
+			if (s.charAt(i) == ']') {
+				if (s.charAt(i - 1) != ']' && s.charAt(i - 1) != '[') {
+					commandList.add(s.substring(start, i));
+				}
+				commandList.add("]");
+			}
+			if (!((s.charAt(i) >= '0' && s.charAt(i) <= '9') || s.charAt(i) == '-')) {
+				start = i + 1;
+			}
+		}
+		if (s.charAt(s.length() - 1) >= '0' && s.charAt(s.length() - 1) <= '9') {
+			commandList.add(s.substring(start, s.length()));
+		}
+
+		Stack<NestedInteger> stack = new Stack<>();
+		for (String word : commandList) {
+			if (word == "[") {
+				NestedInteger ni = new NestedInteger();
+				stack.push(ni);
+			}
+			else if (word == "]") {
+				NestedInteger doneNi = stack.pop();
+				if (!stack.isEmpty()) {
+					stack.peek().add(doneNi);
+				}
+				else {
+					return doneNi;
+				}
+			}
+			else {
+				NestedInteger valueNi = new NestedInteger(Integer.valueOf(word));
+				if (!stack.isEmpty()) {
+					NestedInteger ni = stack.peek();
+					ni.add(valueNi);
+				}
+				else {
+					return valueNi;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	// ****end****
+
+	// 394 Decode String
+	// ***start***
+	private class KSb {
+		int _k;
+		StringBuilder _sb;
+
+		KSb(int n) {
+			_k = n;
+			_sb = new StringBuilder();
+		}
+
+		void append(char c) {
+			_sb.append(c);
+		}
+
+		void append(StringBuilder sb) {
+			_sb.append(sb);
+		}
+
+		StringBuilder returnKSb() {
+			StringBuilder result = new StringBuilder();
+			for (int i = 1; i <= _k; i++) {
+				result.append(_sb);
+			}
+			return result;
+		}
+	}
+
+	public String decodeString(String s) {
+		Stack<KSb> stack = new Stack<>();
+		stack.push(new KSb(1));
+
+		int start = 0;
+		for (int i = 0; i <= s.length() - 1; i++) {
+			if (s.charAt(i) == '[') {
+				stack.push(new KSb(Integer.valueOf(s.substring(start, i))));
+			}
+			else if (s.charAt(i) == ']') {
+				StringBuilder sb = stack.pop().returnKSb();
+				stack.peek().append(sb);
+			}
+			else if (!(s.charAt(i) >= '0' && s.charAt(i) <= '9')) { // chars
+				stack.peek().append(s.charAt(i));
+			}
+			if (!(s.charAt(i) >= '0' && s.charAt(i) <= '9')) {
+				start = i + 1;
+			}
+			// numbers: do nothing
+		}
+
+		return stack.peek().returnKSb().toString();
+	}
+	
+	// ****end****
 }
 
 // 295 Find Median from Data Stream
