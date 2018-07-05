@@ -766,36 +766,62 @@ public class Solution {
 
 	// 239 Sliding Window Maximum
 	// ***start***
-	public static int[] maxSlidingWindow(int[] nums, int k) {
-		if (k == 1 || nums.length == 0) {
-			return nums;
-		}
-
-		int[] maxes = new int[nums.length - k + 1];
-		Deque<Integer> deque = new LinkedList<>();
-		deque.addLast(nums[0]);
-		for (int j = 1; j <= k - 1; j++) {
-			while (!deque.isEmpty() && nums[j] > deque.getLast()) {
-				deque.removeLast();
-			}
-			deque.addLast(nums[j]);
-		}
-		maxes[0] = deque.getFirst();
-
-		for (int i = k; i <= nums.length - 1; i++) {
-			if (nums[i - k] == deque.getFirst()) {
-				deque.removeFirst();
-			}
-			while (!deque.isEmpty() && nums[i] > deque.getLast()) {
-				deque.removeLast();
-			}
-			deque.addLast(nums[i]);
-			maxes[i - k + 1] = deque.getFirst();
-			printIntArray(maxes);
-		}
-
-		return maxes;
-	}
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if(nums.length==0) {
+            return nums;
+        }
+        
+        TreeSet<Integer> bstOfIndexes=new TreeSet<>((o1, o2)->{ 
+            if(nums[o1]!=nums[o2]) {
+                return Integer.compare(nums[o1], nums[o2]);}
+            else {
+                return Integer.compare(o1, o2);} });
+        int len=nums.length;
+        int[] result=new int[len-k+1];
+        
+        for(int i=0; i<=k-1; i++) {
+            bstOfIndexes.add(i);
+        }
+        result[0]=nums[bstOfIndexes.last()];
+        
+        for(int i=1; i<=len-k; i++) {
+            bstOfIndexes.remove(i-1);
+            bstOfIndexes.add(i+k-1);
+            result[i]=nums[bstOfIndexes.last()];
+        }
+        
+        return result;
+    }
+	
+//    public int[] maxSlidingWindow(int[] nums, int k) {
+//        if(k==1 || nums.length==0) {
+//			return nums;
+//		}
+//
+//		int[] maxes=new int[nums.length-k+1];
+//		Deque<Integer> deque=new LinkedList<>();
+//		deque.addLast(nums[0]);
+//		for(int j=1; j<=k-1; j++) {
+//			while(!deque.isEmpty() && nums[j]>deque.getLast()) {
+//				deque.removeLast();
+//			}
+//			deque.addLast(nums[j]);
+//		}
+//		maxes[0]=deque.getFirst();
+//		
+//		for(int i=k; i<=nums.length-1; i++) {
+//			if(nums[i-k]==deque.getFirst()) {
+//				deque.removeFirst();
+//			}
+//			while(!deque.isEmpty() && nums[i]>deque.getLast()) {
+//				deque.removeLast();
+//			}
+//			deque.addLast(nums[i]);
+//			maxes[i-k+1]=deque.getFirst();
+//		}
+//		
+//		return maxes;
+//    }
 
 	public static void printIntArray(int[] arr) {
 		for (int num : arr) {
@@ -1148,9 +1174,811 @@ public class Solution {
 
 		return stack.peek().returnKSb().toString();
 	}
-	
+
 	// ****end****
+
+	// 729. My Calendar I
+	class MyCalendar {
+		private TreeMap<Integer, Integer> bst = new TreeMap<>();
+
+		public MyCalendar() {
+		}
+
+		public boolean book(int start, int end) {
+			Map.Entry<Integer, Integer> smaller = bst.floorEntry(start);
+			if (smaller != null && smaller.getValue() > start) {
+				return false;
+			}
+
+			Map.Entry<Integer, Integer> larger = bst.ceilingEntry(start);
+			if (larger != null && larger.getKey() < end) {
+				return false;
+			}
+
+			bst.put(start, end);
+			return true;
+		}
+	}
+
+	// ****end****
+
+	// 23. Merge k Sorted Lists
+	// ***start***
+	// minHeap Method
+	public class ListNode {
+		int val;
+		ListNode next;
+		ListNode(int x) {
+			val=x;
+		}
+	}
+//	
+//    public ListNode mergeKLists(ListNode[] lists) {
+//        ListNode result;
+//        ListNode curNode;
+//        PriorityQueue<ListNode> minHeap=new PriorityQueue<>(
+//        		(o1, o2)->Integer.compare(o1.val, o2.val));
+//        for(ListNode node:lists) {
+//            if(node!=null) {
+//                minHeap.add(node);
+//            }
+//        }
+//        if(minHeap.isEmpty()) {
+//            return null;
+//        }
+//        result=minHeap.poll();
+//        curNode=result;
+//        if(result.next!=null) {
+//            minHeap.add(curNode.next);
+//        }
+//        
+//        while(!minHeap.isEmpty()) {
+//            ListNode nextToAdd=minHeap.poll();
+//            if(nextToAdd.next!=null) {
+//                minHeap.add(nextToAdd.next);
+//            }
+//            curNode.next=nextToAdd;
+//            curNode=curNode.next;
+//        }
+//        
+//        return result;
+//    }
+    
+    // mergeSort method
+    private ListNode mergeMultiple(ListNode[] lists, int start, int end) {
+        if(start==end) {
+            return lists[start];
+        }
+        else {
+            int mid=(start+end)/2;
+            return merge(mergeMultiple(lists, start, mid), 
+                         mergeMultiple(lists, mid+1, end));
+        }
+    }
+    
+    private ListNode merge(ListNode left, ListNode right) {
+        ListNode fakeNode=new ListNode(-1);
+        ListNode curNode=fakeNode;
+        while(left!=null && right!=null) {
+            if(left.val<=right.val) {
+                curNode.next=left;
+                curNode=curNode.next;
+                left=left.next;
+            }
+            else { // >
+                curNode.next=right;
+                curNode=curNode.next;
+                right=right.next;
+            } 
+        }
+        curNode.next=left==null?right:left;
+        return fakeNode.next;
+    }
+    
+    public ListNode mergeKLists(ListNode[] lists) {
+        if(lists.length==0) {
+            return null;
+        }
+        return mergeMultiple(lists, 0, lists.length-1);
+    }
+    
+    // ****end****
+	    
+    
+    // 358 Rearrange String k Distance Apart
+    // ***start***
+//    public String rearrangeString(String s, int k) {
+//    	if(s.length()==0) {
+//    		return "";
+//    	}
+//    	if(k<=1) {
+//    		return s;
+//    	}
+//    	
+//    	int[] charToCount=new int[26];
+//    	for(int i=0; i<=s.length()-1; i++) {
+//    		charToCount[s.charAt(i)-'a']++;
+//    	}
+//    	// maxHeap: store charNum
+//    	PriorityQueue<Integer> maxHeap=new PriorityQueue<>((o1, o2)->
+//    		charToCount[o1]!=charToCount[o2]
+//    		?charToCount[o2]-charToCount[o1]
+//    		:Integer.compare(o1, o2));
+//    	for(int i=0; i<=25; i++) {
+//    		if(charToCount[i]!=0) {
+//    			maxHeap.add(i);
+//    		}
+//    	}
+//    	
+//    	StringBuilder resultSb=new StringBuilder();
+//    	for(int block=0; block<=Math.ceil((double)s.length()/k)-1; block++) {
+//    		ArrayList<Integer> usedCharNums=new ArrayList<>();
+//    		for(int i=0; i<=k-1 && block*k+i<=s.length()-1; i++) {
+//    			if(maxHeap.isEmpty()) {
+//    				return "";
+//    			}
+//    			int charNum=maxHeap.poll();
+//    			charToCount[charNum]--;
+//    			if(charToCount[charNum]!=0) {
+//    				usedCharNums.add(charNum);
+//    			}
+//    			resultSb.append((char)(charNum+'a'));
+//    		}
+//    		for(int usedCharNum:usedCharNums) {
+//    			maxHeap.add(usedCharNum);
+//    		}
+//    	}
+//    	
+//    	return resultSb.toString();
+//    }
+	
+    public String rearrangeString(String s, int k) {
+    	if(s.length()==0) {
+    		return "";
+    	}
+    	if(k<=1) {
+    		return s;
+    	}
+    	
+    	int[] charToCount=new int[26];
+    	for(int i=0; i<=s.length()-1; i++) {
+    		charToCount[s.charAt(i)-'a']++;
+    	}
+    	// maxHeap: store charNum
+    	PriorityQueue<Integer> maxHeap=new PriorityQueue<>((o1, o2)->
+    		charToCount[o1]!=charToCount[o2]
+    		?charToCount[o2]-charToCount[o1]
+    		:Integer.compare(o1, o2));
+    	for(int i=0; i<=25; i++) {
+    		if(charToCount[i]!=0) {
+    			maxHeap.add(i);
+    		}
+    	}
+    	
+    	StringBuilder resultSb=new StringBuilder();
+    	for(int i=0; ;) {
+    		ArrayList<Integer> usedCharNums=new ArrayList<>();
+    		for(int j=1; j<=k; j++) {
+    			if(maxHeap.isEmpty()) {
+    				return "";
+    			}
+    			int charNum=maxHeap.poll();
+    			charToCount[charNum]--;
+    			if(charToCount[charNum]!=0) {
+    				usedCharNums.add(charNum);
+    			}
+    			resultSb.append((char)(charNum+'a'));
+                i++;
+                if(i==s.length()) {
+                    return resultSb.toString();
+                }
+    		}
+    		for(int usedCharNum:usedCharNums) {
+    			maxHeap.add(usedCharNum);
+    		}
+    	}
+    
+    }
+    // ****end****
+    
+    // 378 Kth Smallest Element in a Sorted Matrix
+    // ***start***
+    
+//    private class LinkedNode{
+//        int _val;
+//        LinkedNode _next;
+//        
+//        LinkedNode(int val) {
+//            _val=val;
+//        }
+//    }
+//    
+//    public int kthSmallest(int[][] matrix, int k) {
+//        int n=matrix.length;
+//        LinkedNode[] linkedNodeList=new LinkedNode[n];
+//        for(int i=0; i<=n-1; i++) {
+//            int[] row=matrix[i];
+//            LinkedNode head=new LinkedNode(row[0]);
+//            LinkedNode curNode=head;
+//            for(int j=1; j<=n-1; j++) {
+//                curNode._next=new LinkedNode(row[j]);
+//                curNode=curNode._next;
+//            }
+//            linkedNodeList[i]=head;
+//        }
+//        
+//        PriorityQueue<LinkedNode> minHeap=new PriorityQueue<>((o1, o2)->Integer.compare(o1._val, o2._val));
+//        for(LinkedNode node:linkedNodeList) {
+//            minHeap.add(node);
+//        }
+//        
+//        
+//        for(int i=1; i<=k-1; i++) {
+//            LinkedNode removed=minHeap.poll();
+//            if(removed._next!=null) {
+//                minHeap.add(removed._next);
+//            }
+//        }
+//        return minHeap.poll()._val;
+//    }
+    
+    // reverse counting
+//    private class LinkedNode{
+//        int _val;
+//        LinkedNode _next;
+//        
+//        LinkedNode(int val) {
+//            _val=val;
+//        }
+//    }
+//    
+//    public int kthSmallest(int[][] matrix, int k) {
+//        int n=matrix.length;
+//        LinkedNode[] linkedNodeList=new LinkedNode[n];
+//        for(int i=0; i<=n-1; i++) {
+//            int[] row=matrix[i];
+//            LinkedNode tail=new LinkedNode(row[n-1]);
+//            LinkedNode curNode=tail;
+//            for(int j=n-2; j>=0; j--) {
+//                curNode._next=new LinkedNode(row[j]);
+//                curNode=curNode._next;
+//            }
+//            linkedNodeList[i]=tail;
+//        }
+//        
+//        PriorityQueue<LinkedNode> maxHeap=new PriorityQueue<>(
+//            (o1, o2)->Integer.compare(o2._val, o1._val));
+//        for(LinkedNode node:linkedNodeList) {
+//            maxHeap.add(node);
+//        }
+//        
+//        int nSquare=n*n;
+//        for(int i=1; i<=nSquare-k; i++) {
+//            LinkedNode removed=maxHeap.poll();
+//            if(removed._next!=null) {
+//                maxHeap.add(removed._next);
+//            }
+//        }
+//        return maxHeap.poll()._val;
+//    }
+    
+    private class Position{
+        int _row;
+        int _col;
+        
+        Position(int row, int col) {
+            _row=row;
+            _col=col;
+        }
+    }
+    
+    public int kthSmallest(int[][] matrix, int k) {
+        int n=matrix.length;
+        
+        PriorityQueue<Position> maxHeap=new PriorityQueue<>(
+            (o1, o2)->Integer.compare(matrix[o2._row][o2._col], matrix[o1._row][o1._col]));
+        for(int i=0; i<=n-1; i++) {
+            maxHeap.add(new Position(i, n-1));
+        }
+        
+        int nSquare=n*n;
+        for(int i=1; i<=nSquare-k; i++) {
+            Position removed=maxHeap.poll();
+            if(removed._col!=0) {
+                maxHeap.add(new Position(removed._row, removed._col-1));
+            }
+        }
+        Position removed=maxHeap.poll();
+        return matrix[removed._row][removed._col];
+    }
+    
+    // ****end****
+    
+    // 692. Top K Frequent Words
+    // ***start***
+    public List<String> topKFrequent(String[] words, int k) {
+        Map<String, Integer> wordToCount=new HashMap<>();
+        for(String word:words) {
+            if(!wordToCount.containsKey(word)) {
+                wordToCount.put(word, 1);
+            }
+            else { // contains
+                wordToCount.put(word, wordToCount.get(word)+1);
+            }
+        }
+        
+        Comparator<String> wordComparator=new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                if(wordToCount.get(o1)!=wordToCount.get(o2)) {
+                    return Integer.compare(wordToCount.get(o1), wordToCount.get(o2));
+                }
+                else {
+                    return o2.compareTo(o1);
+                }
+            }
+        };
+        
+        PriorityQueue<String> minHeap=new PriorityQueue<>(wordComparator);
+        for(String word:wordToCount.keySet()) {
+        	if(minHeap.size()==k) {
+                if(wordComparator.compare(word, minHeap.peek())>0) {
+                    minHeap.poll(); 
+                    minHeap.add(word);
+                }
+        	}
+        	minHeap.add(word);
+        }
+        
+        LinkedList<String> result=new LinkedList<>();
+        for(int i=k-1; i>=0; k--) {
+            result.addFirst(minHeap.poll());
+        }
+        return result;
+    }
+    
+    // ****end****
+    
+    // 179 Largest Number
+    // ***start***
+    public String largestNumber(int[] nums) {
+        String[] a=new String[nums.length];
+        for(int i=0; i<=nums.length-1; i++) {
+            a[i]=nums[i]+"";
+        }
+        
+        Arrays.sort(a, (s1, s2)->(s2+s1).compareTo(s1+s2));
+        
+        StringBuilder sb=new StringBuilder();
+        for(String str:a) {
+            sb.append(str);
+        }
+        
+        return sb.charAt(0)=='0'?"0":sb.toString();
+    }
+    
+    // ****end****
+    
+    // 56 Merge Intervals
+    // ***start***
+    public class Interval {
+    	int start;
+    	int end;
+    	Interval() {
+    		start=0;
+    		end=0;
+    	}
+    	
+    	Interval(int s, int e) {
+    		start=s;
+    		end=e;
+    	}
+    }
+    
+    public List<Interval> merge(List<Interval> intervals) {
+        LinkedList<Interval> result=new LinkedList<>();
+        if(intervals.isEmpty()) {
+            return result;
+        }
+        Collections.sort(intervals, (o1, o2)->Integer.compare(o1.start, o2.start));
+        Iterator<Interval> ite=intervals.iterator();
+        result.add(ite.next());
+        
+        while(ite.hasNext()) {
+            Interval curInterval=ite.next();
+            Interval lastInterval=result.getLast();
+            if(curInterval.start<=lastInterval.end) {
+                result.removeLast();
+                result.add(new Interval(lastInterval.start, Math.max(curInterval.end, lastInterval.end)));
+            }
+            else {
+                result.add(curInterval);
+            }
+        }
+        
+        return result;
+    }
+    
+    // ****end****
+    
+    // 853 Car Fleet
+    // ***start***
+    private class Car {
+        int _position;
+        int _speed;
+        double _time;
+        
+        Car(int position, int speed, int target) {
+            _position=position;
+            _speed=speed;
+            _time=(target-_position+0.0)/_speed;
+        }
+    }
+    
+    public int carFleet(int target, int[] position, int[] speed) {
+        int len=position.length;
+        if(len==0) {
+            return 0;
+        }
+        Car[] cars=new Car[len];
+        for(int i=0; i<=len-1; i++) {
+            cars[i]=new Car(position[i], speed[i], target);
+        }
+        Arrays.sort(cars, (o1, o2)->Integer.compare(o1._position, o2._position));
+        
+        Stack<Car> stack=new Stack<>();
+        stack.push(cars[0]);
+        
+        for(int i=1; i<=len-1; i++) {
+            Car curCar=cars[i];
+            while(!stack.isEmpty() && stack.peek()._time<=curCar._time) {
+                stack.pop();
+            }
+            stack.push(curCar);
+        }
+        
+        return stack.size();
+    }
+    
+    // ****end****
+    
+    // 253 Meeting Rooms II
+    // ***start***
+    /**
+     * Definition for an interval.
+     * public class Interval {
+     *     int start;
+     *     int end;
+     *     Interval() { start = 0; end = 0; }
+     *     Interval(int s, int e) { start = s; end = e; }
+     * }
+     */
+    public int minMeetingRooms(Interval[] intervals) {
+    	if(intervals.length==0) {
+    		return 0;
+    	}
+    	
+        Arrays.sort(intervals, (o1, o2)->Integer.compare(o1.start, o2.start));
+        PriorityQueue<Interval> minHeap=new PriorityQueue<>(
+        		(o1, o2)->Integer.compare(o1.end, o2.end));
+        minHeap.add(intervals[0]);
+        
+        for(int i=1; i<=intervals.length-1; i++) {
+        	Interval earliestEndEvent=minHeap.peek();
+        	if(intervals[i].start<earliestEndEvent.start) {
+        		minHeap.poll();
+        	}
+        	minHeap.add(intervals[i]);
+        }
+        
+        return minHeap.size();
+    }
+    
+    // ****end****
+    
+    // 621. Task Scheduler
+    // ***start***
+    public int leastInterval(char[] tasks, int n) {
+        int tasksLeft=tasks.length;
+        int result=0;
+        if(tasksLeft==0) {
+            return result;
+        }
+        int[] taskToCount=new int[26];
+        for(char task:tasks) {
+            taskToCount[task-'A']++;
+        }
+        
+        // A maxheap caontaining charNum
+        PriorityQueue<Integer> maxHeap=new PriorityQueue<>(
+        		(o1, o2)->
+               taskToCount[o1]!=taskToCount[o2]
+               ?Integer.compare(taskToCount[o2], taskToCount[o1])
+               :Integer.compare(o1, o2));
+        for(int i=0; i<=25; i++) {
+            if(taskToCount[i]!=0) {
+                maxHeap.add(i);
+            }
+        }
+        
+        while(tasksLeft!=0) {
+            ArrayList<Integer> usedTasks=new ArrayList<>();
+            for(int i=0; i<=n; i++) {
+                if(!maxHeap.isEmpty()) {
+                    int removed=maxHeap.poll();
+                    taskToCount[removed]--;
+                    tasksLeft--;
+                    if(taskToCount[removed]!=0) {
+                        usedTasks.add(removed);
+                    }
+                }
+                result++;
+                if(tasksLeft==0) {
+                    return result;
+                }
+            }
+            for(int tasksToAddBack:usedTasks) {
+                maxHeap.add(tasksToAddBack);
+            }
+        }
+        
+        return result;
+    }
+    
+    // ****end****
+    
+    // 846. Hand of Straights
+    // ***start***
+    public boolean isNStraightHand(int[] hand, int W) {
+        int len=hand.length;
+        if(len%W!=0) {
+            return false;
+        }
+        
+        HashMap<Integer, Integer> numToCount=new HashMap<>();
+        for(int num:hand) {
+            if(!numToCount.containsKey(num)) {
+                numToCount.put(num, 1);
+            }
+            else {
+                numToCount.put(num, numToCount.get(num)+1);
+            }
+        }
+        
+        PriorityQueue<Integer> minHeap=new PriorityQueue<>((o1, o2)->Integer.compare(o1, o2));
+        for(int num:numToCount.keySet()) {
+            minHeap.add(num);
+        }
+        
+        while(!minHeap.isEmpty()) {
+            ArrayList<Integer> numsToAddBack=new ArrayList<>();
+            if(minHeap.isEmpty()) {
+                return false;
+            }
+            int firstInAGroup=minHeap.poll();
+            int last=firstInAGroup;
+            if(numToCount.get(firstInAGroup)!=1) {
+                numsToAddBack.add(firstInAGroup);
+                numToCount.put(firstInAGroup, numToCount.get(firstInAGroup)-1);
+            }
+            for(int i=2; i<=W; i++) {
+                if(minHeap.isEmpty()) {
+                    return false;
+                }
+                int removed=minHeap.poll();
+                if(removed!=last+1) {
+                    return false;
+                } 
+                last=removed;
+                if(numToCount.get(removed)!=1) {
+                    numsToAddBack.add(removed);
+                    numToCount.put(removed, numToCount.get(removed)-1);
+                }
+            }
+            for(int num:numsToAddBack) {
+                minHeap.add(num);
+            }
+        }
+        
+        return true;                                               
+    }
+    
+    // ****end****
+    
+    // 767. Reorganize String
+    // ***start***
+    public String reorganizeString(String S) {
+        int len=S.length();
+        if(len==0) {
+            return "";
+        }
+        int[] charnumToCount=new int[26];
+        for(int i=0; i<=len-1; i++) {
+            charnumToCount[S.charAt(i)-'a']++;
+        }
+        
+        PriorityQueue<Integer> maxHeap=new PriorityQueue<>(
+        		(o1, o2)->charnumToCount[o1]!=charnumToCount[o2]
+        				?Integer.compare(charnumToCount[o2], charnumToCount[o1])
+        						:Integer.compare(o1, o2));
+        for(int i=0; i<=25; i++) {
+            if(charnumToCount[i]!=0) {
+                maxHeap.add(i);
+            }
+        }
+        
+        StringBuilder sb=new StringBuilder();
+        for(int i=0; ;) {
+            ArrayList<Integer> numsToAddBack=new ArrayList<>();
+            for(int j=1; j<=2; j++) {
+                if(maxHeap.isEmpty()) {
+                    return "";
+                }
+                int removed=maxHeap.poll();
+                sb.append((char)(removed+'a'));
+                charnumToCount[removed]--;
+                if(charnumToCount[removed]!=0) {
+                    numsToAddBack.add(removed);
+                }
+                i++;
+                if(i==len) {
+                    return sb.toString();
+                }
+            }
+            for(int num:numsToAddBack) {
+                maxHeap.add(num);
+            }
+        }
+    }
+    
+    // ****end****
+    
+    // 215. Kth Largest Element in an Array
+    // ***start***
+    public int findKthLargest(int[] nums, int k) {
+        int len=nums.length;
+        // 从大的数
+        if(k<=len/2) {
+            PriorityQueue<Integer> minHeap=new PriorityQueue<>(
+            		(o1, o2)->Integer.compare(o1, o2));
+            for(int i=0; i<=len-1; i++) {
+                if(minHeap.size()==k && nums[i]>minHeap.peek()) {
+                    minHeap.poll();
+                    minHeap.add(nums[i]);
+                }
+                if(minHeap.size()!=k) {
+                    minHeap.add(nums[i]);
+                }
+            }
+            
+            return minHeap.peek();
+        }
+        // 从小的数
+        else {
+            PriorityQueue<Integer> maxHeap=new PriorityQueue<>(
+            		(o1, o2)->Integer.compare(o2, o1));
+            for(int i=0; i<=len-1; i++) {
+                if(maxHeap.size()==len-k+1 && nums[i]<maxHeap.peek()) {
+                    maxHeap.poll();
+                    maxHeap.add(nums[i]);
+                }
+                if(maxHeap.size()!=len-k+1) {
+                    maxHeap.add(nums[i]);
+                }
+            }
+            
+            return maxHeap.peek();
+        }
+    }
+    
+    // ****end****
+    
+    // 373. Find K Pairs with Smallest Sums
+    // ***start***
+    public List<int[]> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        List<int[]> result=new ArrayList<>();
+        int len1=nums1.length;
+        int len2=nums2.length;
+        if(len1==0 || len2==0 || k<=0) {
+            return result;
+        }
+        // indexes
+        PriorityQueue<int[]> minHeap=new PriorityQueue<>(
+        		(o1, o2)->Integer.compare(nums1[o1[0]]+nums2[o1[1]], 
+        				nums1[o2[0]]+nums2[o2[1]]));
+        boolean[] pos1=new boolean[len1];
+        boolean[] pos2=new boolean[len2];
+        minHeap.add(new int[]{0, 0});
+        pos1[0]=true;
+        pos2[0]=true;
+        
+        while(!minHeap.isEmpty()) {
+            int[] removed=minHeap.poll();
+            result.add(new int[]{nums1[removed[0]], nums2[removed[1]]});
+            k--;
+            if(k==0) {
+                return result;
+            }
+            pos1[removed[0]]=false;
+            pos2[removed[1]]=false;
+            if(removed[0]+1<=len1-1 && pos1[removed[0]+1]==false) {
+                pos1[removed[0]+1]=true;
+                pos2[removed[1]]=true;
+                minHeap.add(new int[]{removed[0]+1, removed[1]});
+            }
+            if(removed[1]+1<=len2-1 && pos2[removed[1]+1]==false) {
+                pos1[removed[0]]=true;
+                pos2[removed[1]+1]=true;
+                minHeap.add(new int[]{removed[0], removed[1]+1});
+            }
+        }
+        
+        return result;
+    }
+    // ****end****
+    
+    // 50. Pow(x, n)
+    // ***start***
+    public double myPow(double x, long n) {
+        if(n==0) {
+            return 1.0;
+        }
+        if(n<0) {
+            return 1.0/myPow(x, -n);
+        }
+        
+        // >0
+        double halfResult=myPow(x, n/2);
+        if(n%2==0) { 
+            return halfResult*halfResult;
+        }
+        else {
+            return halfResult*halfResult*x;
+        }
+    }
+    // ****end****
 }
+
+// main out
+// 244. Shortest Word Distance II
+// ***start***
+class WordDistance {
+    HashMap<String, ArrayList<Integer>> wordToPoss=new HashMap<>();
+
+    public WordDistance(String[] words) {
+        for(int i=0; i<=words.length-1; i++) {
+            if(!wordToPoss.containsKey(words[i])) {
+                ArrayList<Integer> newList=new ArrayList<>();
+                newList.add(i);
+                wordToPoss.put(words[i], newList);
+            }
+            else {
+                wordToPoss.get(words[i]).add(i);
+            }
+        }
+    }
+
+    public int shortest(String word1, String word2) {
+        int result=Integer.MAX_VALUE;
+        List<Integer> word1Poss=wordToPoss.get(word1);
+        List<Integer> word2Poss=wordToPoss.get(word2);
+        int i=0, j=0;
+        while(i<=word1Poss.size()-1 && j<=word2Poss.size()-1) {
+            if(word1Poss.get(i)<word2Poss.get(j)) {
+                result=Math.min(result, word2Poss.get(j)-word1Poss.get(i));
+                i++;
+            }
+            else { // >=
+                result=Math.min(result, word1Poss.get(i)-word2Poss.get(j));
+                j++;
+            }
+        }
+
+        return result;
+    }
+}
+
+// ****end****
 
 // 295 Find Median from Data Stream
 // ***start***
